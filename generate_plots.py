@@ -9,9 +9,9 @@ Usage
     python generate_plots.py
 """
 
-# Create plot_scatter(sensor_a, sensor_b, timestamps, ax) that draws
-# the scatter plot from the notebook onto the given Axes object.
-# NumPy-style docstring. Modifies ax in place, returns None.
+# Create a function generate_data(seed) that returns sensor_a, sensor_b,
+# and timestamps arrays with the same parameters as in the notebook.
+# Use NumPy-style docstring with Parameters and Returns sections.
 
 import numpy as np
 
@@ -58,3 +58,7 @@ def generate_data(seed: int):
     sensor_b = rng.normal(loc=27.0, scale=4.5, size=n).astype(np.float64)
 
     return sensor_a, sensor_b, timestamps
+
+# Create plot_scatter(sensor_a, sensor_b, timestamps, ax) that draws
+# the scatter plot from the notebook onto the given Axes object.
+# NumPy-style docstring. Modifies ax in place, returns None.
