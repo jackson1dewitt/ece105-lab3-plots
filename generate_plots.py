@@ -210,12 +210,12 @@ def plot_boxplot(data_list, labels, ax, title: str = 'Box plots', ylabel: str = 
 # at 150 DPI with tight bounding box.
 
 def main(seed: int = 5264, out_path: str = 'sensor_analysis.png', dpi: int = 150) -> None:
-    """Generate data, create three subplots (scatter, histogram, boxplot), and save a PNG.
+    """Generate data, create a 2×2 figure (scatter, histogram, boxplot, summary), and save a PNG.
 
     This convenience main function converts the notebook workflow into a
     standalone script: it generates reproducible synthetic sensor data,
-    creates a single-row figure with three panels (scatter, overlaid
-    histogram, and box plots), and writes the result to a PNG file.
+    creates a 2×2 figure with three visualization panels and one summary
+    panel, and writes the result to a PNG file.
 
     Parameters
     ----------
@@ -233,22 +233,22 @@ def main(seed: int = 5264, out_path: str = 'sensor_analysis.png', dpi: int = 150
 
     Notes
     -----
-    - Uses the plotting helper functions defined in this module and
-      creates a 1x3 subplot layout sized to reasonably display each panel.
+    - Arranges plots in a 2×2 grid to match the updated notebook layout. The
+      lower-right panel contains summary statistics for quick reference.
     """
     import matplotlib.pyplot as plt
     from pathlib import Path
     # generate data
     sensor_a, sensor_b, timestamps = generate_data(seed)
 
-    # create 1x3 figure
-    fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+    # create 2x2 figure
+    fig, axes = plt.subplots(2, 2, figsize=(12, 8))
 
-    # left: scatter
-    plot_scatter(sensor_a, sensor_b, timestamps, axes[0])
+    # top-left: scatter
+    plot_scatter(sensor_a, sensor_b, timestamps, axes[0, 0])
 
-    # middle: overlaid histogram (both sensors)
-    ax_mid = axes[1]
+    # top-right: overlaid histogram (both sensors)
+    ax_mid = axes[0, 1]
     bins = 30
     ax_mid.hist(sensor_a, bins=bins, alpha=0.5, label='Sensor A (25±3°C)', color='tab:blue', edgecolor='black')
     ax_mid.hist(sensor_b, bins=bins, alpha=0.5, label='Sensor B (27±4.5°C)', color='tab:orange', edgecolor='black')
@@ -264,8 +264,23 @@ def main(seed: int = 5264, out_path: str = 'sensor_analysis.png', dpi: int = 150
     ax_mid.set_title('Overlaid histograms of Sensor temperatures')
     ax_mid.legend()
 
-    # right: box plots
-    plot_boxplot([sensor_a, sensor_b], ['Sensor A', 'Sensor B'], axes[2], title='Box plots of Sensor temperatures', ylabel='Temperature (°C)')
+    # bottom-left: box plots
+    plot_boxplot([sensor_a, sensor_b], ['Sensor A', 'Sensor B'], axes[1, 0], title='Box plots of Sensor temperatures', ylabel='Temperature (°C)')
+
+    # bottom-right: summary statistics text
+    ax_sum = axes[1, 1]
+    ax_sum.axis('off')
+    stats = {
+        'Sensor A mean': ma,
+        'Sensor A std': float(np.std(sensor_a, ddof=0)),
+        'Sensor B mean': mb,
+        'Sensor B std': float(np.std(sensor_b, ddof=0)),
+        'n': len(sensor_a)
+    }
+    lines = [f'{k}: {v:.2f}' if isinstance(v, float) else f'{k}: {v}' for k, v in stats.items()]
+    txt = '\n'.join(lines)
+    ax_sum.text(0.01, 0.99, 'Summary statistics:', transform=ax_sum.transAxes, va='top', fontsize=10, fontweight='bold')
+    ax_sum.text(0.01, 0.92, txt, transform=ax_sum.transAxes, va='top', fontsize=10, family='monospace')
 
     # layout and save
     plt.tight_layout()
